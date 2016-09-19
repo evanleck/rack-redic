@@ -13,6 +13,8 @@ Addtionally, you may pass in the URL for your Redis server. The default
 URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku and
 others' practices.
 
+Any other options will get passed to Rack::Session::Abstract::Persisted.
+
 
 ## Installation
 

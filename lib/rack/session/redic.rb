@@ -19,13 +19,15 @@ module Rack
     # URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku and
     # others' practices.
     #
+    # Any other options will get passed to Rack::Session::Abstract::Persisted.
+    #
     class Redic < Abstract::Persisted
       def initialize(app, options = {})
         super
 
         @mutex = Mutex.new
-        @marshaller = options.delete(:marshaller, Marshal)
-        @storage = StorageWrapper.new(@marshaller, options.delete(:url, ENV.fetch('REDIS_URL')))
+        @marshaller = options.delete(:marshaller) { Marshal }
+        @storage = StorageWrapper.new(@marshaller, options.delete(:url) { ENV.fetch('REDIS_URL') })
       end
 
       # Only accept a generated session ID if it doesn't exist.
@@ -77,7 +79,7 @@ module Rack
 
         def initialize(marshaller, url)
           @marshaller = marshaller
-          @storage = Redic.new(url)
+          @storage = ::Redic.new(url)
         end
 
         def exists?(id)
