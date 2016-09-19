@@ -1,14 +1,14 @@
-# Rack::Redic
+# Rack::Session::Redic
 
-Rack::Session::Redic provides simple cookie based session management. Session data is stored in Redis via the [Redic](https://github.com/amakawa/redic) gem. The corresponding session key is maintained in the cookie.
+`Rack::Session::Redic` provides simple cookie based session management. Session data is stored in [Redis](http://redis.io) via the [Redic](https://github.com/amakawa/redic) gem. The corresponding session key is maintained in the cookie.
 
 Options include:
 
 - `:marshaller` - You may optionally supply the class/module you would like to use when marshalling objects in and out of Redis. All that is required is that this class respond to the  `load` and `dump` methods, returning the session hash and a string respectively.
-- `:url` - Addtionally, you may pass in the URL for your Redis server. The default URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku and others' practices.
+- `:url` - Addtionally, you may pass in the URL for your Redis server. The default URL is fetched from the `ENV` as `REDIS_URL` in keeping with Heroku and others' practices.
 - `:expire_after` - Finally, expiration will be passed to the Redis server via the 'EX' option on 'SET'. Expiration should be in seconds, just like Rack's default handling of the `:expire_after` option. This option will refresh the expiration set in Redis with each request.
 
-Any other options will get passed to Rack::Session::Abstract::Persisted.
+Any other options will get passed to `Rack::Session::Abstract::Persisted`.
 
 
 ## Installation
@@ -40,10 +40,10 @@ use Rack::Session::Redic
 use Rack::Session::Redic, marshaller: Oj
 
 # And/or pass in the URL of your Redis server.
-use Rack::Session::Redic, marshaller: Oj, url: 'redis://host'
+use Rack::Session::Redic, marshaller: Oj, url: 'redis://host:port'
 
 # And/or pass in the expiration. (1_800 is 30 minutes in seconds)
-use Rack::Session::Redic, marshaller: Oj, url: 'redis://host', expire_after: 1_800
+use Rack::Session::Redic, marshaller: Oj, url: 'redis://host:port', expire_after: 1_800
 ```
 
 

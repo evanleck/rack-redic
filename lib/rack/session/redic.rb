@@ -32,8 +32,11 @@ module Rack
         super
 
         @mutex = Mutex.new
-        @marshaller = options.delete(:marshaller) { Marshal }
-        @storage = StorageWrapper.new(@marshaller, options.delete(:url) { ENV.fetch('REDIS_URL') }, options[:expire_after])
+        @storage = Storage.new(
+          options[:expire_after],
+          options.delete(:marshaller) { Marshal },
+          options.delete(:url) { ENV.fetch('REDIS_URL') }
+        )
       end
 
       # Only accept a generated session ID if it doesn't exist.
@@ -75,15 +78,14 @@ module Rack
 
       private
 
-      # Generic storage wrapper.
-      #   Currently using Redis via Redic.
-      class StorageWrapper
+      # A wrapper around Redic to simplify calls.
+      class Storage
         DELETE = 'DEL'
         EXISTS = 'EXISTS'
         GET = 'GET'
         SET = 'SET'
 
-        def initialize(marshaller, url, expires)
+        def initialize(expires, marshaller, url)
           @expires = expires
           @marshaller = marshaller
           @storage = ::Redic.new(url)
