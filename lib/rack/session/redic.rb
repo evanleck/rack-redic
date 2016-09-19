@@ -11,14 +11,19 @@ module Rack
     # Session data is stored in Redis via the Redic gem. The corresponding
     # session key is maintained in the cookie.
     #
-    # You may optionally supply the class/module you would like to use when
-    # marshalling objects in and out of Redis. All that is required is that
-    # this class respond to the  `load` and `dump` methods, returning the
-    # session hash and a string respectively.
+    # Options include:
     #
-    # Addtionally, you may pass in the URL for your Redis server. The default
-    # URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku and
-    # others' practices.
+    # - :marshaller - You may optionally supply the class/module you would
+    #   like to use when marshalling objects in and out of Redis. All that is
+    #   required is that this class respond to the  `load` and `dump` methods,
+    #   returning the session hash and a string respectively.
+    # - :url - Addtionally, you may pass in the URL for your Redis server. The
+    #   default URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku
+    #   and others' practices.
+    # - :expire_after - Finally, expiration will be passed to the Redis server
+    #   via the 'EX' option on 'SET'. Expiration should be in seconds, just like
+    #   Rack's default handling of the :expire_after option. This option will
+    #   refresh the expiration set in Redis with each request.
     #
     # Any other options will get passed to Rack::Session::Abstract::Persisted.
     #
@@ -28,7 +33,7 @@ module Rack
 
         @mutex = Mutex.new
         @marshaller = options.delete(:marshaller) { Marshal }
-        @storage = StorageWrapper.new(@marshaller, options.delete(:url) { ENV.fetch('REDIS_URL') })
+        @storage = StorageWrapper.new(@marshaller, options.delete(:url) { ENV.fetch('REDIS_URL') }, options[:expire_after])
       end
 
       # Only accept a generated session ID if it doesn't exist.
@@ -78,7 +83,8 @@ module Rack
         GET = 'GET'
         SET = 'SET'
 
-        def initialize(marshaller, url)
+        def initialize(marshaller, url, expires)
+          @expires = expires
           @marshaller = marshaller
           @storage = ::Redic.new(url)
         end
@@ -92,7 +98,10 @@ module Rack
         end
 
         def set(id, object)
-          @storage.call(SET, id, serialize(object))
+          arguments = [SET, id, serialize(object)]
+          arguments = arguments + ['EX', @expires] if @expires
+
+          @storage.call(*arguments)
         end
 
         def delete(id)
