@@ -1,17 +1,10 @@
 # Rack::Redic
 
-Rack::Session::Redic provides simple cookie based session management.
-Session data is stored in Redis via the Redic gem. The corresponding
-session key is maintained in the cookie.
+Rack::Session::Redic provides simple cookie based session management. Session data is stored in Redis via the [Redic](https://github.com/amakawa/redic) gem. The corresponding session key is maintained in the cookie.
 
-You may optionally supply the class/module you would like to use when
-marshalling objects in and out of Redis. All that is required is that
-this class respond to the  `load` and `dump` methods, returning the
-session hash and a string respectively.
+You may optionally supply the class/module you would like to use when marshalling objects in and out of Redis. All that is required is that this class respond to the  `load` and `dump` methods, returning the session hash and a string respectively.
 
-Addtionally, you may pass in the URL for your Redis server. The default
-URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku and
-others' practices.
+Addtionally, you may pass in the URL for your Redis server. The default URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku and others' practices.
 
 Any other options will get passed to Rack::Session::Abstract::Persisted.
 
