@@ -28,6 +28,8 @@ module Rack
     # Any other options will get passed to Rack::Session::Abstract::Persisted.
     #
     class Redic < Abstract::Persisted
+      REDIS_URL = 'REDIS_URL'.freeze
+
       def initialize(app, options = {})
         super
 
@@ -35,7 +37,7 @@ module Rack
         @storage = Storage.new(
           options[:expire_after],
           options.delete(:marshaller) { Marshal },
-          options.delete(:url) { ENV.fetch('REDIS_URL') }
+          options.delete(:url) { ENV.fetch(REDIS_URL) }
         )
       end
 
@@ -80,10 +82,16 @@ module Rack
 
       # A wrapper around Redic to simplify calls.
       class Storage
-        DELETE = 'DEL'
-        EXISTS = 'EXISTS'
-        GET = 'GET'
-        SET = 'SET'
+        # Redis commands.
+        DELETE = 'DEL'.freeze
+        EX = 'EX'.freeze
+        EXISTS = 'EXISTS'.freeze
+        GET = 'GET'.freeze
+        SET = 'SET'.freeze
+
+        # Assorted.
+        PACK = 'm'.freeze
+        ZERO = 0
 
         def initialize(expires, marshaller, url)
           @expires = expires
@@ -92,7 +100,7 @@ module Rack
         end
 
         def exists?(id)
-          @storage.call(EXISTS, id) != 0
+          @storage.call(EXISTS, id) != ZERO
         end
 
         def get(id)
@@ -101,7 +109,7 @@ module Rack
 
         def set(id, object)
           arguments = [SET, id, serialize(object)]
-          arguments = arguments + ['EX', @expires] if @expires
+          arguments = arguments + [EX, @expires] if @expires
 
           @storage.call(*arguments)
         end
@@ -114,13 +122,12 @@ module Rack
 
         # Should always return a string.
         def serialize(object)
-          [Zlib::Deflate.deflate(@marshaller.dump(object))].pack('m')
+          [Zlib::Deflate.deflate(@marshaller.dump(object))].pack(PACK)
         end
 
         # Should always return the session object.
         def deserialize(string)
-          return unless string
-          @marshaller.load(Zlib::Inflate.inflate(string.unpack('m').first))
+          @marshaller.load(Zlib::Inflate.inflate(string.unpack(PACK).first))
         end
       end
     end
