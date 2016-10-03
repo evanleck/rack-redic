@@ -48,7 +48,7 @@ module Rack
       end
 
       # Find the session (or generate a blank one).
-      def find_session(req, sid)
+      def find_session(_req, sid)
         @mutex.synchronize do
           unless sid and session = @storage.get(sid)
             sid, session = generate_sid, {}
@@ -60,7 +60,7 @@ module Rack
       end
 
       # Write the session.
-      def write_session(req, session_id, new_session, options)
+      def write_session(_req, session_id, new_session, _options)
         @mutex.synchronize do
           @storage.set(session_id, new_session)
 
@@ -69,7 +69,7 @@ module Rack
       end
 
       # Kill the session.
-      def delete_session(req, session_id, options)
+      def delete_session(_req, session_id, options)
         @mutex.synchronize do
           @storage.delete(session_id)
           generate_sid unless options[:drop]
