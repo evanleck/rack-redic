@@ -52,10 +52,8 @@ module Rack
       # Find the session (or generate a blank one).
       def find_session(_req, sid)
         @mutex.synchronize do
-          unless sid and session = @storage.get(sid)
-            sid, session = generate_sid, {}
-            @storage.set(sid, session)
-          end
+          sid ||= generate_sid
+          session = @storage.get(sid) || @storage.init(sid, {})
 
           [sid, session]
         end
@@ -100,6 +98,11 @@ module Rack
 
         def exists?(id)
           @storage.call(EXISTS, id) != ZERO
+        end
+
+        def init(sid, initial)
+          set(sid, initial)
+          initial
         end
 
         def get(id)
