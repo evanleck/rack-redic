@@ -126,6 +126,7 @@ module Rack
 
         # Should always return the session object.
         def deserialize(string)
+          return unless string
           @marshaller.load(Zlib::Inflate.inflate(string.unpack(PACK).first))
         end
       end
