@@ -18,8 +18,8 @@ module Rack
     #   required is that this class respond to the  `load` and `dump` methods,
     #   returning the session hash and a string respectively.
     # - :url - Addtionally, you may pass in the URL for your Redis server. The
-    #   default URL is fetched from the ENV as 'REDIS_URL' in keeping with Heroku
-    #   and others' practices.
+    #   default URL is fetched from the ENV as 'REDIS_URL' in keeping with
+    #   Heroku and others' practices.
     # - :expire_after - Finally, expiration will be passed to the Redis server
     #   via the 'EX' option on 'SET'. Expiration should be in seconds, just like
     #   Rack's default handling of the :expire_after option. This option will
@@ -78,8 +78,7 @@ module Rack
         end
       end
 
-      private
-
+      ##
       # A wrapper around Redic to simplify calls.
       class Storage
         # Redis commands.
@@ -109,7 +108,7 @@ module Rack
 
         def set(id, object)
           arguments = [SET, id, serialize(object)]
-          arguments = arguments + [EX, @expires] if @expires
+          arguments += [EX, @expires] if @expires
 
           @storage.call(*arguments)
         end
