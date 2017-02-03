@@ -133,7 +133,7 @@ module Rack
           @marshaller.load(Zlib::Inflate.inflate(string.unpack(PACK).first))
 
         # Loading has failed at the marshaller.
-        rescue TypeError
+        rescue
           nil
         end
       end
