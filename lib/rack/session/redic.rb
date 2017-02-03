@@ -131,6 +131,10 @@ module Rack
         def deserialize(string)
           return unless string
           @marshaller.load(Zlib::Inflate.inflate(string.unpack(PACK).first))
+
+        # Loading has failed at the marshaller.
+        rescue TypeError
+          nil
         end
       end
     end
