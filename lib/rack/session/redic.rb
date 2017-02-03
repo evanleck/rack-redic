@@ -36,8 +36,8 @@ module Rack
         @mutex = Mutex.new
         @storage = Storage.new(
           options[:expire_after],
-          options.delete(:marshaller) { Marshal },
-          options.delete(:url) { ENV.fetch(REDIS_URL) }
+          options.fetch(:marshaller, Marshal),
+          options.fetch(:url, ENV.fetch(REDIS_URL))
         )
       end
 
