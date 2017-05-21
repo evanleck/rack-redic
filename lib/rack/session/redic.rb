@@ -30,14 +30,16 @@ module Rack
     class Redic < Abstract::Persisted
       REDIS_URL = 'REDIS_URL'.freeze
 
+      attr_reader :storage
+
       def initialize(app, options = {})
         super
 
         @mutex = Mutex.new
         @storage = Storage.new(
           options[:expire_after],
-          options.fetch(:marshaller, Marshal),
-          options.fetch(:url, ENV.fetch(REDIS_URL))
+          options.fetch(:marshaller) { Marshal },
+          options.fetch(:url) { ENV.fetch(REDIS_URL) }
         )
       end
 
@@ -52,8 +54,9 @@ module Rack
       # Find the session (or generate a blank one).
       def find_session(_req, sid)
         @mutex.synchronize do
-          sid ||= generate_sid
-          session = @storage.get(sid) || @storage.init(sid, {})
+          unless sid && session = @storage.get(sid)
+            sid, session = generate_sid, {}
+          end
 
           [sid, session]
         end
@@ -98,11 +101,6 @@ module Rack
 
         def exists?(id)
           @storage.call(EXISTS, id) != ZERO
-        end
-
-        def init(sid, initial)
-          set(sid, initial)
-          initial
         end
 
         def get(id)
