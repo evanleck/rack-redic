@@ -48,7 +48,7 @@ use Rack::Session::Redic, marshaller: Oj, url: 'redis://host:port', expire_after
 
 ### Custom Marshallers
 
-Since the class/module passed as `:marshaller` only needs to respond to the methods `load` and `dump` you can create any kind of marshaller you would like. I've included examples for MessagePack and Oj here as reference.
+Since the class/module passed as `:marshaller` only needs to respond to the methods `load` and `dump`, you can create any kind of marshaller you would like. I've included examples for MessagePack and Oj here as reference.
 
 #### [MessagePack](https://github.com/msgpack/msgpack-ruby)
 
@@ -86,9 +86,10 @@ Oj responds to `load` and `dump` by default so there's no adapter method needed.
 use Rack::Session::Redic, marshaller: Oj
 ```
 
+
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/evanleck/rack-redic. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at [https://github.com/evanleck/rack-redic](https://github.com/evanleck/rack-redic). This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 
 ## License
