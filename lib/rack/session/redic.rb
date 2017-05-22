@@ -127,6 +127,10 @@ module Rack
         # Should always return the session object.
         def deserialize(string)
           @marshaller.load(string) if string
+
+        # In the case that loading fails, return a nil.
+        rescue
+          nil
         end
       end
     end
