@@ -89,7 +89,6 @@ module Rack
         SET = 'SET'.freeze
 
         # Assorted.
-        PACK = 'm'.freeze
         ZERO = 0
 
         def initialize(expires, marshaller, url)

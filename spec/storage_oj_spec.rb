@@ -8,7 +8,7 @@ describe Rack::Session::Redic::Storage do
     it_behaves_like 'a storage marshaller'
 
     subject do
-      Rack::Session::Redic::Storage.new(nil, Oj, ENV['REDIS_URL'])
+      described_class.new(nil, Oj, ENV['REDIS_URL'])
     end
   end
 end
