@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 require 'rack/session/abstract/id'
 require 'redic'
-require 'zlib'
 
 module Rack
   module Session
@@ -122,13 +121,12 @@ module Rack
 
         # Should always return a string.
         def serialize(object)
-          [Zlib::Deflate.deflate(@marshaller.dump(object))].pack(PACK)
+          @marshaller.dump(object)
         end
 
         # Should always return the session object.
         def deserialize(string)
-          return unless string
-          @marshaller.load(Zlib::Inflate.inflate(string.unpack(PACK).first))
+          @marshaller.load(string) if string
 
         # Loading has failed at the marshaller.
         rescue
