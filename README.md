@@ -80,7 +80,7 @@ use Rack::Session::Redic, marshaller: MessagePackMarshaller
 
 #### [Oj](https://github.com/ohler55/oj)
 
-Oj responds to `load` and `dump` by default so there's no adapter method needed.
+Oj responds to `load` and `dump` by default so there's no adapter module needed.
 
 ```ruby
 use Rack::Session::Redic, marshaller: Oj
