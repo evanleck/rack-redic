@@ -46,6 +46,45 @@ use Rack::Session::Redic, marshaller: Oj, url: 'redis://host:port'
 use Rack::Session::Redic, marshaller: Oj, url: 'redis://host:port', expire_after: 1_800
 ```
 
+### Custom Marshallers
+
+Since the class/module passed as `:marshaller` only needs to respond to the methods `load` and `dump` you can create any kind of marshaller you would like. I've included examples for MessagePack and Oj here as reference.
+
+#### [MessagePack](https://github.com/msgpack/msgpack-ruby)
+
+```ruby
+require 'msgpack'
+
+MessagePack::DefaultFactory.register_type(0x00, Symbol)
+
+module MessagePackMarshaller
+  def dump(object)
+    MessagePack.pack(object)
+  end
+  module_function :dump
+
+  def load(string)
+    MessagePack.unpack(string)
+  end
+  module_function :load
+end
+```
+
+Then, while adding it your Rack application.
+
+```ruby
+use Rack::Session::Redic, marshaller: MessagePackMarshaller
+```
+
+**NOTE:** MessagePack [serializes symbols as strings by default](https://github.com/msgpack/msgpack-ruby#serializing-and-deserializing-symbols) so I suggest customizing that behavior per their instructions. You can [read more about MessagePack's extension formats here](https://github.com/msgpack/msgpack/blob/master/spec.md#types-extension-type).
+
+#### [Oj](https://github.com/ohler55/oj)
+
+Oj responds to `load` and `dump` by default so there's no adapter method needed.
+
+```ruby
+use Rack::Session::Redic, marshaller: Oj
+```
 
 ## Contributing
 
