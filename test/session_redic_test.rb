@@ -44,8 +44,8 @@ describe Rack::Session::Redic do
     redic = Rack::Session::Redic.new(incrementor)
     response = Rack::MockRequest.new(redic).get(ROOT)
 
-    expect(response[Rack::SET_COOKIE]).to include("#{ session_key }=")
-    expect(response.body).to eq('{"counter"=>1}')
+    assert_includes response[Rack::SET_COOKIE], "#{ session_key }="
+    assert_equal response.body, '{"counter"=>1}'
   end
 
   it 'determines session from a cookie' do
@@ -55,8 +55,8 @@ describe Rack::Session::Redic do
 
     cookie = response[Rack::SET_COOKIE]
 
-    expect(request.get(ROOT, Rack::HTTP_COOKIE => cookie).body).to eq('{"counter"=>2}')
-    expect(request.get(ROOT, Rack::HTTP_COOKIE => cookie).body).to eq('{"counter"=>3}')
+    assert_equal request.get(ROOT, Rack::HTTP_COOKIE => cookie).body, '{"counter"=>2}'
+    assert_equal request.get(ROOT, Rack::HTTP_COOKIE => cookie).body, '{"counter"=>3}'
   end
 
   it 'determines session only from a cookie by default' do
@@ -65,8 +65,8 @@ describe Rack::Session::Redic do
     response = request.get(ROOT)
     sid = response[Rack::SET_COOKIE][session_match, 1]
 
-    expect(request.get("/?rack.session=#{sid}").body).to eq('{"counter"=>1}')
-    expect(request.get("/?rack.session=#{sid}").body).to eq('{"counter"=>1}')
+    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>1}'
+    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>1}'
   end
 
   it 'determines session from params' do
@@ -75,8 +75,8 @@ describe Rack::Session::Redic do
     response = request.get(ROOT)
     sid = response[Rack::SET_COOKIE][session_match, 1]
 
-    expect(request.get("/?rack.session=#{sid}").body).to eq('{"counter"=>2}')
-    expect(request.get("/?rack.session=#{sid}").body).to eq('{"counter"=>3}')
+    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>2}'
+    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>3}'
   end
 
   it 'survives nonexistant cookies' do
@@ -85,29 +85,29 @@ describe Rack::Session::Redic do
     redic = Rack::Session::Redic.new(incrementor)
     response = Rack::MockRequest.new(redic).get(ROOT, Rack::HTTP_COOKIE => bad_cookie)
 
-    expect(response.body).to eq('{"counter"=>1}')
+    assert_equal response.body, '{"counter"=>1}'
 
     cookie = response[Rack::SET_COOKIE][session_match]
-    expect(cookie).not_to match(/#{ bad_cookie }/)
+    refute_match /#{ bad_cookie }/, cookie
   end
 
   it 'maintains freshness' do
     redic = Rack::Session::Redic.new(incrementor, expire_after: 3)
     response = Rack::MockRequest.new(redic).get(ROOT)
-    expect(response.body).to include('"counter"=>1')
+    assert_includes response.body, '"counter"=>1'
 
     cookie = response[Rack::SET_COOKIE]
     response = Rack::MockRequest.new(redic).get(ROOT, Rack::HTTP_COOKIE => cookie)
 
-    expect(response[Rack::SET_COOKIE]).to eq(cookie)
-    expect(response.body).to include('"counter"=>2')
+    assert_equal response[Rack::SET_COOKIE], cookie
+    assert_includes response.body, '"counter"=>2'
 
     puts 'Sleeping to expire session' if $DEBUG
     sleep 4
 
     response = Rack::MockRequest.new(redic).get(ROOT, Rack::HTTP_COOKIE => cookie)
-    expect(response[Rack::SET_COOKIE]).not_to eq(cookie)
-    expect(response.body).to include('"counter"=>1')
+    refute_equal response[Rack::SET_COOKIE], cookie
+    assert_includes response.body, '"counter"=>1'
   end
 
   it 'does not send the same session id if it did not change' do
@@ -116,15 +116,15 @@ describe Rack::Session::Redic do
 
     res0 = request.get(ROOT)
     cookie = res0[Rack::SET_COOKIE][session_match]
-    expect(res0.body).to eq('{"counter"=>1}')
+    assert_equal res0.body, '{"counter"=>1}'
 
     res1 = request.get(ROOT, Rack::HTTP_COOKIE => cookie)
-    expect(res1[Rack::SET_COOKIE]).to eq(nil)
-    expect(res1.body).to eq('{"counter"=>2}')
+    assert_nil res1[Rack::SET_COOKIE]
+    assert_equal res1.body, '{"counter"=>2}'
 
     res2 = request.get(ROOT, Rack::HTTP_COOKIE => cookie)
-    expect(res2[Rack::SET_COOKIE]).to eq(nil)
-    expect(res2.body).to eq('{"counter"=>3}')
+    assert_nil res2[Rack::SET_COOKIE]
+    assert_equal res2.body, '{"counter"=>3}'
   end
 
   it 'deletes cookies with :drop option' do
@@ -135,15 +135,15 @@ describe Rack::Session::Redic do
 
     res1 = request.get(ROOT)
     session = (cookie = res1[Rack::SET_COOKIE])[session_match]
-    expect(res1.body).to eq('{"counter"=>1}')
+    assert_equal res1.body, '{"counter"=>1}'
 
     res2 = dreq.get(ROOT, Rack::HTTP_COOKIE => cookie)
-    expect(res2[Rack::SET_COOKIE]).to eq(nil)
-    expect(res2.body).to eq('{"counter"=>2}')
+    assert_nil res2[Rack::SET_COOKIE]
+    assert_equal res2.body, '{"counter"=>2}'
 
     res3 = request.get(ROOT, Rack::HTTP_COOKIE => cookie)
-    expect(res3[Rack::SET_COOKIE][session_match]).not_to eq(session)
-    expect(res3.body).to eq('{"counter"=>1}')
+    refute_equal res3[Rack::SET_COOKIE][session_match], session
+    assert_equal res3.body, '{"counter"=>1}'
   end
 
   it 'provides new session id with :renew option' do
@@ -154,20 +154,20 @@ describe Rack::Session::Redic do
 
     res1 = request.get(ROOT)
     session = (cookie = res1[Rack::SET_COOKIE])[session_match]
-    expect(res1.body).to eq('{"counter"=>1}')
+    assert_equal res1.body, '{"counter"=>1}'
 
     res2 = renew_request.get(ROOT, Rack::HTTP_COOKIE => cookie)
     new_cookie = res2[Rack::SET_COOKIE]
     new_session = new_cookie[session_match]
-    expect(new_session).not_to eq(session)
-    expect(res2.body).to eq('{"counter"=>2}')
+    refute_equal new_session, session
+    assert_equal res2.body, '{"counter"=>2}'
 
     res3 = request.get(ROOT, Rack::HTTP_COOKIE => new_cookie)
-    expect(res3.body).to eq('{"counter"=>3}')
+    assert_equal res3.body, '{"counter"=>3}'
 
     # Old cookie was deleted
     res4 = request.get(ROOT, Rack::HTTP_COOKIE => cookie)
-    expect(res4.body).to eq('{"counter"=>1}')
+    assert_equal res4.body, '{"counter"=>1}'
   end
 
   it 'omits cookie with :defer option but still updates the state' do
@@ -178,14 +178,14 @@ describe Rack::Session::Redic do
     count_request = Rack::MockRequest.new(count)
 
     res0 = defer_request.get(ROOT)
-    expect(res0[Rack::SET_COOKIE]).to eq(nil)
-    expect(res0.body).to eq('{"counter"=>1}')
+    assert_nil res0[Rack::SET_COOKIE]
+    assert_equal res0.body, '{"counter"=>1}'
 
     res0 = count_request.get(ROOT)
     res1 = defer_request.get(ROOT, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
-    expect(res1.body).to eq('{"counter"=>2}')
+    assert_equal res1.body, '{"counter"=>2}'
     res2 = defer_request.get(ROOT, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
-    expect(res2.body).to eq('{"counter"=>3}')
+    assert_equal res2.body, '{"counter"=>3}'
   end
 
   it 'omits cookie and state update with :skip option' do
@@ -196,14 +196,14 @@ describe Rack::Session::Redic do
     count_request = Rack::MockRequest.new(count)
 
     res0 = skip_request.get(ROOT)
-    expect(res0[Rack::SET_COOKIE]).to eq(nil)
-    expect(res0.body).to eq('{"counter"=>1}')
+    assert_nil res0[Rack::SET_COOKIE]
+    assert_equal res0.body, '{"counter"=>1}'
 
     res0 = count_request.get(ROOT)
     res1 = skip_request.get(ROOT, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
-    expect(res1.body).to eq('{"counter"=>2}')
+    assert_equal res1.body, '{"counter"=>2}'
     res2 = skip_request.get(ROOT, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
-    expect(res2.body).to eq('{"counter"=>2}')
+    assert_equal res2.body, '{"counter"=>2}'
   end
 
   it 'updates deep hashes correctly' do
@@ -229,6 +229,6 @@ describe Rack::Session::Redic do
     request.get(ROOT, Rack::HTTP_COOKIE => cookie)
     ses1 = redic.storage.get(session_id)
 
-    expect(ses1).not_to eq(ses0)
+    refute_equal ses1, ses0
   end
 end

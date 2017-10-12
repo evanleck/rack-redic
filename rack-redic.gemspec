@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 Gem::Specification.new do |spec|
   spec.name    = 'rack-redic'
-  spec.version = '1.2.0'
+  spec.version = '1.3.0'
   spec.authors = ['Evan Lecklider']
   spec.email   = ['evan@lecklider.com']
 
@@ -11,12 +11,12 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://github.com/evanleck/rack-redic'
   spec.license     = 'MIT'
   spec.files       = `git ls-files`.split("\n")
-  spec.test_files  = spec.files.grep(/^spec/)
+  spec.test_files  = spec.files.grep(/^test/)
 
   spec.add_dependency 'rack'
   spec.add_dependency 'redic'
 
+  spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'msgpack'
   spec.add_development_dependency 'oj'
-  spec.add_development_dependency 'rspec'
 end
