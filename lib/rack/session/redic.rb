@@ -78,7 +78,6 @@ module Rack
         end
       end
 
-      ##
       # A wrapper around Redic to simplify calls.
       class Storage
         # Redis commands.
@@ -91,20 +90,46 @@ module Rack
         # Assorted.
         ZERO = 0
 
+        # @param expires [Integer]
+        #   The number of seconds for Redis to retain keys.
+        # @param marshaller [#dump, #load]
+        #   The module or class used to marshal objects. It must respond to
+        #   #dump and #load.
+        # @param url [String]
+        #   The URL to access Redis at.
         def initialize(expires, marshaller, url)
           @expires = expires
           @marshaller = marshaller
           @storage = ::Redic.new(url)
         end
 
+        # Check for an identifier's existence.
+        #
+        # @param id [String]
+        #   The key to check for.
+        # @return [Boolean]
         def exists?(id)
           @storage.call(EXISTS, id) != ZERO
         end
 
+        # Retrieve an object.
+        #
+        # @param id [String]
+        #   The key in Redis to retrieve from.
+        # @return [Object, nil]
+        #   The object stored at the identifier provided, or nil.
         def get(id)
           deserialize(@storage.call(GET, id))
         end
 
+        # Store an object.
+        #
+        # @param id [String]
+        #   The key to use to store the object.
+        # @param object [Object]
+        #   Any object that can be serialized.
+        # @return [String]
+        #   See {https://redis.io/commands/set#return-value Redis' docs for more}.
         def set(id, object)
           arguments = [SET, id, serialize(object)]
           arguments += [EX, @expires] if @expires
@@ -112,18 +137,33 @@ module Rack
           @storage.call(*arguments)
         end
 
+        # Remove an object.
+        #
+        # @param id [String]
+        #   The key to delete.
+        # @return [Integer]
+        #   The number of keys that were deleted. See
+        #   {https://redis.io/commands/del#return-value Redis' docs for more}.
         def delete(id)
           @storage.call(DELETE, id)
         end
 
         private
 
-        # Should always return a string.
+        # Serialize an object using our marshaller.
+        #
+        # @param object [Object]
+        # @return [String]
+        #   The object serialized by the marshaller.
         def serialize(object)
           @marshaller.dump(object)
         end
 
-        # Should always return the session object.
+        # Deserialize a string back into an object.
+        #
+        # @param string [String]
+        # @return [Object, nil]
+        #   Returns the object as loaded by the marshaller, or nil.
         def deserialize(string)
           @marshaller.load(string) if string
 
