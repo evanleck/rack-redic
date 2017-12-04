@@ -2,10 +2,10 @@
 # frozen_string_literal: true
 require 'rack/session/abstract/id'
 require 'redic'
+require 'securerandom'
 
 module Rack
   module Session
-    #
     # Rack::Session::Redic provides simple cookie based session management.
     # Session data is stored in Redis via the Redic gem. The corresponding
     # session key is maintained in the cookie.
@@ -25,46 +25,55 @@ module Rack
     #   refresh the expiration set in Redis with each request.
     #
     # Any other options will get passed to Rack::Session::Abstract::Persisted.
-    #
     class Redic < Abstract::Persisted
-      REDIS_URL = 'REDIS_URL'.freeze
+      # Redis commands.
+      DELETE = 'DEL'.freeze
+      EX = 'EX'.freeze
+      EXISTS = 'EXISTS'.freeze
+      GET = 'GET'.freeze
+      SET = 'SET'.freeze
 
-      attr_reader :storage
+      # Assorted.
+      REDIS_URL = 'REDIS_URL'.freeze
+      ZERO = 0
 
       def initialize(app, options = {})
         super
 
+        @expires = options[:expire_after]
+        @marshaller = options.fetch(:marshaller) { Marshal }
         @mutex = Mutex.new
-        @storage = Storage.new(
-          options[:expire_after],
-          options.fetch(:marshaller) { Marshal },
-          options.fetch(:url) { ENV.fetch(REDIS_URL) }
-        )
+        @storage = ::Redic.new(options.fetch(:url) { ENV.fetch(REDIS_URL) })
       end
 
-      # Only accept a generated session ID if it doesn't exist.
+      # Generate a session ID that doesn't already exist.
+      #
+      # Based on Rack::Session::Abstract::Persisted#generate_sid and
+      # Rack::Session::Memcache#generate_sid but without the conditional check.
+      # We always generate the session ID from SecureRandom#hex.
+      #
+      # @return [String]
       def generate_sid
         loop do
-          sid = super
-          break sid unless @storage.exists?(sid)
+          session_id = SecureRandom.hex(@sid_length)
+          break session_id unless @storage.call(EXISTS, session_id) != ZERO
         end
       end
 
       # Find the session (or generate a blank one).
       def find_session(_req, sid)
         @mutex.synchronize do
-          unless sid && session = @storage.get(sid)
-            sid, session = generate_sid, {}
-          end
-
-          [sid, session]
+          [sid || generate_sid, deserialize(@storage.call(GET, sid)) || {}]
         end
       end
 
       # Write the session.
       def write_session(_req, session_id, new_session, _options)
+        arguments = [SET, session_id, serialize(new_session)]
+        arguments += [EX, @expires] if @expires
+
         @mutex.synchronize do
-          @storage.set(session_id, new_session)
+          @storage.call(*arguments)
 
           session_id
         end
@@ -73,105 +82,34 @@ module Rack
       # Kill the session.
       def delete_session(_req, session_id, options)
         @mutex.synchronize do
-          @storage.delete(session_id)
+          @storage.call(DELETE, session_id)
           generate_sid unless options[:drop]
         end
       end
 
-      # A wrapper around Redic to simplify calls.
-      class Storage
-        # Redis commands.
-        DELETE = 'DEL'.freeze
-        EX = 'EX'.freeze
-        EXISTS = 'EXISTS'.freeze
-        GET = 'GET'.freeze
-        SET = 'SET'.freeze
-
-        # Assorted.
-        ZERO = 0
-
-        # @param expires [Integer]
-        #   The number of seconds for Redis to retain keys.
-        # @param marshaller [#dump, #load]
-        #   The module or class used to marshal objects. It must respond to
-        #   #dump and #load.
-        # @param url [String]
-        #   The URL to access Redis at.
-        def initialize(expires, marshaller, url)
-          @expires = expires
-          @marshaller = marshaller
-          @storage = ::Redic.new(url)
-        end
-
-        # Check for an identifier's existence.
-        #
-        # @param id [String]
-        #   The key to check for.
-        # @return [Boolean]
-        def exists?(id)
-          @storage.call(EXISTS, id) != ZERO
-        end
-
-        # Retrieve an object.
-        #
-        # @param id [String]
-        #   The key in Redis to retrieve from.
-        # @return [Object, nil]
-        #   The object stored at the identifier provided, or nil.
-        def get(id)
-          deserialize(@storage.call(GET, id))
-        end
-
-        # Store an object.
-        #
-        # @param id [String]
-        #   The key to use to store the object.
-        # @param object [Object]
-        #   Any object that can be serialized.
-        # @return [String]
-        #   See {https://redis.io/commands/set#return-value Redis' docs for more}.
-        def set(id, object)
-          arguments = [SET, id, serialize(object)]
-          arguments += [EX, @expires] if @expires
-
-          @storage.call(*arguments)
-        end
-
-        # Remove an object.
-        #
-        # @param id [String]
-        #   The key to delete.
-        # @return [Integer]
-        #   The number of keys that were deleted. See
-        #   {https://redis.io/commands/del#return-value Redis' docs for more}.
-        def delete(id)
-          @storage.call(DELETE, id)
-        end
-
-        private
-
-        # Serialize an object using our marshaller.
-        #
-        # @param object [Object]
-        # @return [String]
-        #   The object serialized by the marshaller.
-        def serialize(object)
-          @marshaller.dump(object)
-        end
-
-        # Deserialize a string back into an object.
-        #
-        # @param string [String]
-        # @return [Object, nil]
-        #   Returns the object as loaded by the marshaller, or nil.
-        def deserialize(string)
-          @marshaller.load(string) if string
-
-        # In the case that loading fails, return a nil.
-        rescue
-          nil
-        end
+      # Serialize an object using our marshaller.
+      #
+      # @param object [Object]
+      # @return [String]
+      #   The object serialized by the marshaller.
+      def serialize(object)
+        @marshaller.dump(object)
       end
+      private :serialize
+
+      # Deserialize a string back into an object.
+      #
+      # @param string [String]
+      # @return [Object, nil]
+      #   Returns the object as loaded by the marshaller, or nil.
+      def deserialize(string)
+        @marshaller.load(string) if string
+
+      # In the case that loading fails, return a nil.
+      rescue
+        nil
+      end
+      private :deserialize
     end
   end
 end

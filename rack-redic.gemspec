@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 Gem::Specification.new do |spec|
   spec.name    = 'rack-redic'
-  spec.version = '1.3.0'
+  spec.version = '1.4.0'
   spec.authors = ['Evan Lecklider']
   spec.email   = ['evan@lecklider.com']
 
@@ -17,6 +17,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'redic'
 
   spec.add_development_dependency 'minitest'
-  spec.add_development_dependency 'msgpack'
-  spec.add_development_dependency 'oj'
 end

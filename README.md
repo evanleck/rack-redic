@@ -13,7 +13,7 @@ Any other options will get passed to `Rack::Session::Abstract::Persisted`.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your application's Gemfile or gems.rb file:
 
 ```ruby
 gem 'rack-redic', require: 'rack/session/redic'
