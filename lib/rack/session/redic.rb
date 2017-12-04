@@ -26,14 +26,14 @@ module Rack
     # Any other options will get passed to Rack::Session::Abstract::Persisted.
     class Redic < Abstract::Persisted
       # Redis commands.
-      DELETE = 'DEL'.freeze
-      EX = 'EX'.freeze
-      EXISTS = 'EXISTS'.freeze
-      GET = 'GET'.freeze
-      SET = 'SET'.freeze
+      DELETE = 'DEL'
+      EX = 'EX'
+      EXISTS = 'EXISTS'
+      GET = 'GET'
+      SET = 'SET'
 
       # Assorted.
-      REDIS_URL = 'REDIS_URL'.freeze
+      REDIS_URL = 'REDIS_URL'
       ZERO = 0
 
       def initialize(app, options = {})
