@@ -36,6 +36,11 @@ module Rack
       REDIS_URL = 'REDIS_URL'
       ZERO = 0
 
+      # Access the storage interface directly. Needed for testing.
+      #
+      # @return [Redic]
+      attr_reader :storage
+
       def initialize(app, options = {})
         super
 
@@ -60,9 +65,13 @@ module Rack
       end
 
       # Find the session (or generate a blank one).
-      def find_session(_req, sid)
+      def find_session(_req, session_id)
         @mutex.synchronize do
-          [sid || generate_sid, deserialize(@storage.call(GET, sid)) || {}]
+          unless session_id && session = deserialize(@storage.call(GET, session_id))
+            session_id, session = generate_sid, {}
+          end
+
+          [session_id, session]
         end
       end
 
@@ -90,7 +99,7 @@ module Rack
       #
       # @param object [Object]
       # @return [String]
-      #   The object serialized by the marshaller.
+      #   The object as serialized by the marshaller.
       def serialize(object)
         @marshaller.dump(object)
       end

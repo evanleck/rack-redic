@@ -7,7 +7,7 @@ $LOAD_PATH.unshift File.expand_path('../..', __FILE__)
 ENV['REDIS_URL'] ||= 'redis://localhost:6379'
 
 # Require our core library.
-require 'rack/session/redic'
+require 'lib/rack/session/redic'
 
 # Kick off the tests.
 require 'minitest/autorun'

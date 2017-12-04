@@ -8,7 +8,7 @@ describe Rack::Session::Redic do
   ROOT = '/'
 
   session_key = Rack::Session::Abstract::Persisted::DEFAULT_OPTIONS[:key]
-  session_match = /#{session_key}=([0-9a-fA-F]+);/
+  session_match = /#{ session_key }=([0-9a-fA-F]+);/
 
   incrementor = lambda do |env|
     env['rack.session']['counter'] ||= 0
@@ -64,8 +64,8 @@ describe Rack::Session::Redic do
     response = request.get(ROOT)
     sid = response[Rack::SET_COOKIE][session_match, 1]
 
-    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>1}'
-    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>1}'
+    assert_equal request.get("/?rack.session=#{ sid }").body, '{"counter"=>1}'
+    assert_equal request.get("/?rack.session=#{ sid }").body, '{"counter"=>1}'
   end
 
   it 'determines session from params' do
@@ -74,8 +74,8 @@ describe Rack::Session::Redic do
     response = request.get(ROOT)
     sid = response[Rack::SET_COOKIE][session_match, 1]
 
-    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>2}'
-    assert_equal request.get("/?rack.session=#{sid}").body, '{"counter"=>3}'
+    assert_equal request.get("/?rack.session=#{ sid }").body, '{"counter"=>2}'
+    assert_equal request.get("/?rack.session=#{ sid }").body, '{"counter"=>3}'
   end
 
   it 'survives nonexistant cookies' do
@@ -223,10 +223,10 @@ describe Rack::Session::Redic do
 
     res0 = request.get(ROOT)
     session_id = (cookie = res0[Rack::SET_COOKIE])[session_match, 1]
-    ses0 = redic.storage.get(session_id)
+    ses0 = redic.storage.call('GET', session_id)
 
     request.get(ROOT, Rack::HTTP_COOKIE => cookie)
-    ses1 = redic.storage.get(session_id)
+    ses1 = redic.storage.call('GET', session_id)
 
     refute_equal ses1, ses0
   end
