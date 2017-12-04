@@ -67,8 +67,8 @@ module Rack
       # Find the session (or generate a blank one).
       def find_session(_req, session_id)
         @mutex.synchronize do
-          unless session_id && session = deserialize(@storage.call(GET, session_id))
-            session_id, session = generate_sid, {}
+          unless session_id && (session = deserialize(@storage.call(GET, session_id)))
+            session_id, session = generate_sid, {} # rubocop:disable Style/ParallelAssignment
           end
 
           [session_id, session]
@@ -114,7 +114,7 @@ module Rack
         @marshaller.load(string) if string
 
       # In the case that loading fails, return a nil.
-      rescue
+      rescue # rubocop:disable Lint/RescueWithoutErrorClass
         nil
       end
       private :deserialize

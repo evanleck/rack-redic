@@ -87,7 +87,7 @@ describe Rack::Session::Redic do
     assert_equal response.body, '{"counter"=>1}'
 
     cookie = response[Rack::SET_COOKIE][session_match]
-    refute_match /#{ bad_cookie }/, cookie
+    refute_match(/#{ bad_cookie }/, cookie)
   end
 
   it 'maintains freshness' do
