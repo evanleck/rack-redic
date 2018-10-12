@@ -78,7 +78,7 @@ module Rack
       # Write the session.
       def write_session(_req, session_id, new_session, _options)
         arguments = [SET, session_id, serialize(new_session)]
-        arguments += [EX, @expires] if @expires
+        arguments.push(EX, @expires) if @expires
 
         @mutex.synchronize do
           @storage.call(*arguments)
@@ -95,6 +95,8 @@ module Rack
         end
       end
 
+      private
+
       # Serialize an object using our marshaller.
       #
       # @param object [Object]
@@ -103,7 +105,6 @@ module Rack
       def serialize(object)
         @marshaller.dump(object)
       end
-      private :serialize
 
       # Deserialize a string back into an object.
       #
@@ -114,10 +115,9 @@ module Rack
         @marshaller.load(string) if string
 
       # In the case that loading fails, return a nil.
-      rescue # rubocop:disable Lint/RescueWithoutErrorClass
+      rescue # rubocop:disable Lint/RescueStandardError
         nil
       end
-      private :deserialize
     end
   end
 end
