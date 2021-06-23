@@ -47,8 +47,8 @@ module Rack
         super(app, options)
 
         @expires = options[:expire_after]
-        @marshaller = options.fetch(:marshaller) { Marshal }
-        @storage = ::Redic.new(options.fetch(:url) { ENV.fetch(REDIS_URL) })
+        @marshaller = options.fetch(:marshaller, Marshal)
+        @storage = ::Redic.new(options.fetch(:url, ENV.fetch(REDIS_URL)))
       end
 
       # Generate a session ID that doesn't already exist.
