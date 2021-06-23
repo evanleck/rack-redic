@@ -15,6 +15,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rack'
   spec.add_dependency 'redic'
 
+  spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'minitest'
+  spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'rubocop-minitest'
+  spec.add_development_dependency 'rubocop-packaging'
+  spec.add_development_dependency 'rubocop-performance'
+  spec.add_development_dependency 'rubocop-rake'
 end
