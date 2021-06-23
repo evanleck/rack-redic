@@ -111,7 +111,7 @@ module Rack
         @marshaller.load(string) if string
 
       # In the case that loading fails, return a nil.
-      rescue # rubocop:disable Lint/RescueStandardError
+      rescue # rubocop:disable Style/RescueStandardError
         nil
       end
     end
