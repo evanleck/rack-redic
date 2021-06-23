@@ -1,19 +1,27 @@
 # http://rubocop.readthedocs.io
 # https://github.com/bbatsov/rubocop/blob/master/config/enabled.yml
+require:
+  - rubocop-performance
+  - rubocop-minitest
+
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
   ExtraDetails: true
-  TargetRubyVersion: 2.4
+  NewCops: enable
+  TargetRubyVersion: 2.5
 
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   EnforcedStyle: with_fixed_indentation
 
 Layout/EmptyLineAfterMagicComment:
   Enabled: false
 
-Layout/IndentHash:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
+
+Layout/LineLength:
+  Enabled: false
 
 Layout/MultilineOperationIndentation:
   EnforcedStyle: indented
@@ -33,8 +41,6 @@ Metrics/ClassLength:
 Metrics/CyclomaticComplexity:
   Enabled: false
 
-Metrics/LineLength:
-  Enabled: false
 
 Metrics/MethodLength:
   Enabled: false
