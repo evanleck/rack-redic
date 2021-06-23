@@ -1,16 +1,21 @@
 # frozen_string_literal: true
 Gem::Specification.new do |spec|
-  spec.name    = 'rack-redic'
-  spec.version = '1.4.2'
+  spec.name = 'rack-redic'
+  spec.version = '2.0.0'
   spec.authors = ['Evan Lecklider']
-  spec.email   = ['evan@lecklider.com']
+  spec.email = ['evan@lecklider.com']
 
-  spec.summary     = 'Rack::Session in Redis via Redic'
-  spec.description = 'Rack::Session in Redis via Redic'
-  spec.homepage    = 'https://github.com/evanleck/rack-redic'
-  spec.license     = 'MIT'
-  spec.files       = `git ls-files`.split("\n")
-  spec.test_files  = spec.files.grep(/^test/)
+  spec.summary = 'Rack::Session in Redis via Redic'
+  spec.description = spec.summary
+  spec.homepage = 'https://github.com/evanleck/rack-redic'
+  spec.license = 'MIT'
+  spec.files = Dir['lib/**/*', 'README.org', 'LICENSE.txt']
+  spec.required_ruby_version = Gem::Requirement.new('>= 2.5.0')
+
+  spec.metadata = {
+    'bug_tracker_uri' => 'https://github.com/evanleck/rack-redic/issues',
+    'source_code_uri' => spec.homepage
+  }
 
   spec.add_dependency 'rack'
   spec.add_dependency 'redic'
