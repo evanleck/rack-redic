@@ -41,7 +41,6 @@ Metrics/ClassLength:
 Metrics/CyclomaticComplexity:
   Enabled: false
 
-
 Metrics/MethodLength:
   Enabled: false
 
@@ -50,9 +49,6 @@ Metrics/ModuleLength:
 
 Metrics/PerceivedComplexity:
   Enabled: false
-
-# Style/Documentation:
-#   Enabled: false
 
 Style/IfUnlessModifier:
   Enabled: false
