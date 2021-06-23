@@ -25,6 +25,8 @@ module Rack
     #
     # Any other options will get passed to Rack::Session::Abstract::Persisted.
     class Redic < Abstract::Persisted
+      HASH = {}.freeze
+
       # Redis commands.
       DELETE = 'DEL'
       EX = 'EX'
@@ -41,8 +43,8 @@ module Rack
       # @return [Redic]
       attr_reader :storage
 
-      def initialize(app, options = {})
-        super
+      def initialize(app, options = HASH)
+        super(app, options)
 
         @expires = options[:expire_after]
         @marshaller = options.fetch(:marshaller) { Marshal }
