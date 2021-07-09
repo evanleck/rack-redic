@@ -47,7 +47,7 @@ module Rack
         super(app, options)
 
         @expires = options[:expire_after]
-        @marshaller = options.fetch(:marshaller, Marshal)
+        @marshaller = options.fetch(:marshaller) { Marshal }
         @storage = ::Redic.new(options.fetch(:url) { ENV.fetch(REDIS_URL) })
       end
 
