@@ -1,4 +1,10 @@
-* Rack::Session::Redic Changelog
+* Changelog
+
+** 2.0.1
+
+Fix a bug where =ENV.fetch(REDIS_URL)= would get evaluated even when it wasn't needed. ([[https://github.com/evanleck/rack-redic/pull/1][#1]])
+
+This change was contributed by [[https://github.com/andreasgassnerwen][@andreasgassnerwen]]
 
 ** 2.0.0
 
