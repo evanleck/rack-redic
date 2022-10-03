@@ -15,8 +15,8 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'rack', '~> 2'
   spec.add_runtime_dependency 'redic', '~> 1'
 
-  spec.metadata['bug_tracker_uri'] = 'https://github.com/evanleck/rack-redic/issues'
-  spec.metadata['changelog_uri'] = 'https://github.com/evanleck/rack-redic/blob/main/CHANGELOG.org'
+  spec.metadata['bug_tracker_uri'] = "#{ spec.homepage }/issues"
+  spec.metadata['changelog_uri'] = "#{ spec.homepage }/blob/main/CHANGELOG.org"
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['rubygems_mfa_required'] = 'true'
   spec.metadata['source_code_uri'] = spec.homepage
