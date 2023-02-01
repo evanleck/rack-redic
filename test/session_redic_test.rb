@@ -94,12 +94,14 @@ describe Rack::Session::Redic do
     assert_equal('{"counter"=>1}', response.body)
 
     cookie = response[Rack::SET_COOKIE][session_match]
+
     refute_match(/#{ bad_cookie }/, cookie)
   end
 
   it 'maintains freshness' do
     redic = Rack::Session::Redic.new(incrementor, expire_after: 3)
     response = Rack::MockRequest.new(redic).get(ROOT_PATH)
+
     assert_includes response.body, '"counter"=>1'
 
     cookie = response[Rack::SET_COOKIE]
@@ -112,6 +114,7 @@ describe Rack::Session::Redic do
     sleep 4
 
     response = Rack::MockRequest.new(redic).get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
+
     refute_equal response[Rack::SET_COOKIE], cookie
     assert_includes response.body, '"counter"=>1'
   end
@@ -122,13 +125,16 @@ describe Rack::Session::Redic do
 
     res0 = request.get(ROOT_PATH)
     cookie = res0[Rack::SET_COOKIE][session_match]
+
     assert_equal('{"counter"=>1}', res0.body)
 
     res1 = request.get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
+
     assert_nil res1[Rack::SET_COOKIE]
     assert_equal('{"counter"=>2}', res1.body)
 
     res2 = request.get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
+
     assert_nil res2[Rack::SET_COOKIE]
     assert_equal('{"counter"=>3}', res2.body)
   end
@@ -141,13 +147,16 @@ describe Rack::Session::Redic do
 
     res1 = request.get(ROOT_PATH)
     session = (cookie = res1[Rack::SET_COOKIE])[session_match]
+
     assert_equal('{"counter"=>1}', res1.body)
 
     res2 = dreq.get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
+
     assert_nil res2[Rack::SET_COOKIE]
     assert_equal('{"counter"=>2}', res2.body)
 
     res3 = request.get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
+
     refute_equal res3[Rack::SET_COOKIE][session_match], session
     assert_equal('{"counter"=>1}', res3.body)
   end
@@ -160,19 +169,23 @@ describe Rack::Session::Redic do
 
     res1 = request.get(ROOT_PATH)
     session = (cookie = res1[Rack::SET_COOKIE])[session_match]
+
     assert_equal('{"counter"=>1}', res1.body)
 
     res2 = renew_request.get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
     new_cookie = res2[Rack::SET_COOKIE]
     new_session = new_cookie[session_match]
+
     refute_equal new_session, session
     assert_equal('{"counter"=>2}', res2.body)
 
     res3 = request.get(ROOT_PATH, Rack::HTTP_COOKIE => new_cookie)
+
     assert_equal('{"counter"=>3}', res3.body)
 
     # Old cookie was deleted
     res4 = request.get(ROOT_PATH, Rack::HTTP_COOKIE => cookie)
+
     assert_equal('{"counter"=>1}', res4.body)
   end
 
@@ -184,13 +197,16 @@ describe Rack::Session::Redic do
     count_request = Rack::MockRequest.new(count)
 
     res0 = defer_request.get(ROOT_PATH)
+
     assert_nil res0[Rack::SET_COOKIE]
     assert_equal('{"counter"=>1}', res0.body)
 
     res0 = count_request.get(ROOT_PATH)
     res1 = defer_request.get(ROOT_PATH, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
+
     assert_equal('{"counter"=>2}', res1.body)
     res2 = defer_request.get(ROOT_PATH, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
+
     assert_equal('{"counter"=>3}', res2.body)
   end
 
@@ -202,13 +218,16 @@ describe Rack::Session::Redic do
     count_request = Rack::MockRequest.new(count)
 
     res0 = skip_request.get(ROOT_PATH)
+
     assert_nil res0[Rack::SET_COOKIE]
     assert_equal('{"counter"=>1}', res0.body)
 
     res0 = count_request.get(ROOT_PATH)
     res1 = skip_request.get(ROOT_PATH, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
+
     assert_equal('{"counter"=>2}', res1.body)
     res2 = skip_request.get(ROOT_PATH, Rack::HTTP_COOKIE => res0[Rack::SET_COOKIE])
+
     assert_equal('{"counter"=>2}', res2.body)
   end
 
