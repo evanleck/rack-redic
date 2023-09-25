@@ -12,7 +12,8 @@ Gem::Specification.new do |spec|
   spec.files = Dir['lib/**/*', 'README.md', 'LICENSE.txt']
   spec.required_ruby_version = '>= 2.5.0'
 
-  spec.add_runtime_dependency 'rack', '~> 2'
+  spec.add_runtime_dependency 'rack', '>= 2.0.0', '< 4'
+  spec.add_runtime_dependency 'rack-session'
   spec.add_runtime_dependency 'redic', '~> 1'
 
   spec.metadata['bug_tracker_uri'] = "#{ spec.homepage }/issues"

@@ -23,11 +23,17 @@ jobs:
         ports:
           - 6379:6379
 
-    name: Test (${{ matrix.ruby }} / ${{ matrix.os }})
     strategy:
+      fail-fast: false
       matrix:
         ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
         os: [ubuntu-latest]
+        rack: [2, 3]
+
+    name: "Test Ruby: ${{ matrix.ruby }} Rack: ${{ matrix.rack }} OS: ${{ matrix.os }}"
+
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rack${{ matrix.rack }}.gemfile
 
     runs-on: ${{ matrix.os }}
     steps:

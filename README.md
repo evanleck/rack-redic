@@ -40,12 +40,6 @@ Or install it yourself as:
 gem install rack-redic
 ```
 
-### Rack 3
-
-With the release of Rack v3.0.0 Rack's `Session` module has been extracted into
-its own gem. To use `Rack::Session::Redic` with Rack v3 be sure to add `gem
-'rack-session'` to your `Gemfile` as well.
-
 ## Usage
 
 Anywhere in your Rack application just add:
