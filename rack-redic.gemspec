@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 Gem::Specification.new do |spec|
   spec.name = 'rack-redic'
-  spec.version = '2.1.0'
+  spec.version = '2.2.0'
   spec.authors = ['Evan Lecklider']
   spec.email = ['evan@lecklider.com']
 

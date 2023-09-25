@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+
+Add support for and test against both Rack v2 and v3.
+
 ## 2.1.0
 
 Pin runtime dependency versions, especially for
